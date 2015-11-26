@@ -1,0 +1,19 @@
+{
+  "name": "actg",
+  "version": "1.0.0",
+  "description": "Visualization of DNA string frequencies",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "experiment",
+    "dna"
+  ],
+  "author": "Andrei Kashcha",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/anvaka/actg"
+  }
+}
