@@ -28,7 +28,7 @@ function createStage(model) {
   }
 
   function init() {
-    camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000000);
+    camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 100000);
     scene = new THREE.Scene();
 
     uniforms = {
@@ -84,9 +84,9 @@ function createStage(model) {
     var container = document.getElementById('three-root');
     container.appendChild(renderer.domElement);
     controls = fly(camera, container, THREE);
-    camera.position.z = 5700;
-    camera.position.x = 1700;
-    camera.position.y = 1800;
+    camera.position.z = 1500;
+    camera.position.x = 200;
+    camera.position.y = 200;
     adjustMovementSpeed(controls, camera);
     hitTest = createHitTest(particleSystem, container, controls);
     hitTest.on('over', reportMouseOver);
@@ -101,7 +101,7 @@ function createStage(model) {
   }
 
   function addConnections() {
-    //model.forEach(setConnection);
+    model.forEach(setConnection);
   }
 
   function setConnection(node, i) {
@@ -176,6 +176,6 @@ function createStage(model) {
     // var absZ = Math.abs(camera.position.z);
     // var z = Math.min(absZ, 5700);
     // var speed = Math.max(0.1, z / 57);
-    controls.movementSpeed = 100;
+    controls.movementSpeed = 10;
   }
 }

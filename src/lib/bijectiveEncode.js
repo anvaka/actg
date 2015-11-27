@@ -1,10 +1,10 @@
 var ALPHABET = "ACGT";
 var base = ALPHABET.length;
 
-export {
-  encode,
-  decode
-}
+module.exports = {
+  encode: encode,
+  decode: decode
+};
 
 function encode(i) {
     if (i === 0) return '';

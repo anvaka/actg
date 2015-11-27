@@ -1,5 +1,9 @@
-export default createModel;
-import {encode, decode} from './bijectiveEncode.js';
+module.exports = createModel;
+
+var boxWidth = 1024;
+var b = require('./bijectiveEncode.js');
+var encode = b.encode;
+var decode = b.decode;
 
 function createModel(array) {
   var api = {
@@ -7,7 +11,7 @@ function createModel(array) {
     forEach,
     nodeAt
   }
-  var boxWidth = 30 * 1024;
+
   var nodes = [];
   array.forEach(addNodeModel);
 
@@ -26,13 +30,17 @@ function createModel(array) {
   }
 
   function addNodeModel(frequency, index) {
-    // Each point in the array represent a sequence of nucleobases as seen in the DNA
-    // An ordinal index in the base 10 can be uniquely mapped to actual sequence
-    // using bijective numeric system with base 4. This system doesn't have 0. Only
-    // possible digits are A, C, G, T.
-    // To summarize: Value represents counts of sequence appearance, index represents chain
-    // case i % 4: 0 -> A, 1 -> C, 2 -> G, 3 -> T
+    var model = getNodeModel(frequency, index, boxWidth);
+    nodes.push(model);
+  }
 
+  /**
+  * Converts chain frequency into graph node with position on the screen
+  *
+  * @param {Number} frequency of the chain occurrence
+  * @param {Number} index of the frequency in the encoded file
+  */
+  function getNodeModel(frequency, index, boxWidth) {
     var sequence = encode(index + 1); // it's 1 based, not 0
     var level = sequence.length;
     var dx = 0, dy = 0, dz = 0;
@@ -40,10 +48,11 @@ function createModel(array) {
     var parentIdx = getParentIndex(sequence);
     var parent;
     if (parentIdx < 0) {
-      parent = { x: 0, y: 0, z: 0 }
+      parent = { x: 0, y: 0, z: 0 };
     } else {
       parent = nodes[parentIdx];
     }
+
     var angle = (index % 4) * Math.PI/2;
     dx = r * Math.cos(angle);
     dy = r * Math.sin(angle);
@@ -54,39 +63,21 @@ function createModel(array) {
       dy = 0;
     }
 
-    // var idxSwitch = index % 4;
-    // if (idxSwitch === 0 || idxSwitch === 2) {
-    //   dy = dx;
-    //   dx = 0
-    // }
-
-    nodes.push({
+    return {
       x: parent.x + dx,
       y: parent.y + dy,
       z: parent.z + dz,
-      sequence,
+      sequence: sequence,
       value: frequency,
-      size: 512 * frequency/27954951
-    });
+      size: Math.min(32, 32 * frequency/954951)
+    };
   }
-}
 
-function getVerticalOffset(boxWidth, level) {
-    var verticalOffset = 0;
-    for (var i = 0; i < level; ++i) {
-      var dx = boxWidth/Math.pow(4, i + 1);
-      if (i % 2 === 0) {
-        verticalOffset += dx;
-      } else {
-        verticalOffset -= dx;
-      }
+  function getParentIndex(sequence) {
+    if (sequence.length <= 1) {
+      return -1;
     }
-    return verticalOffset
+    return decode(sequence.substr(0, sequence.length - 1)) - 1;
+  }
 }
 
-function getParentIndex(sequence) {
-  if (sequence.length <= 1) {
-    return -1;
-  }
-  return decode(sequence.substr(0, sequence.length - 1)) - 1;
-}

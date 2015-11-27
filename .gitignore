@@ -7,6 +7,8 @@ lib-cov
 *.pid
 *.gz
 
+out.count
+ngraph.nohead.ACGTrie.*
 pids
 logs
 results
