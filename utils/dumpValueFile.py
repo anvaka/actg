@@ -22,7 +22,7 @@ import math
 import struct
 
 LEVELS_TO_DUMP = 5
-OUT_FILE_NAME = 'out.count'
+OUT_FILE_NAME = 'out.count.' + str(LEVELS_TO_DUMP)
 
 A = numpy.memmap('ngraph.nohead.ACGTrie.A', dtype='uint32')
 C = numpy.memmap('ngraph.nohead.ACGTrie.C', dtype='uint32')
@@ -101,6 +101,7 @@ def totalItems(maxNested):
 
 fo = open(OUT_FILE_NAME, 'wb')
 totalItemsToProcess = totalItems(LEVELS_TO_DUMP)
+print "Saving frequencies..."
 
 for x in range(1, totalItemsToProcess):
     sequence = bijective_encode(x)
@@ -109,3 +110,4 @@ for x in range(1, totalItemsToProcess):
     fo.write(struct.pack('<i', score))
 
 fo.close()
+print "Saved " + str(totalItemsToProcess) + " records to " + OUT_FILE_NAME
