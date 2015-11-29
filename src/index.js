@@ -9,7 +9,7 @@ import {endpoint} from '../config.js';
 import createModel from './lib/model.js';
 import createStage from './lib/createStage.js';
 
-fetch(endpoint + 'out.count', {
+fetch(endpoint, {
   responseType: 'arraybuffer'
 }).then(function(response) {
     if (response.status >= 400) {
