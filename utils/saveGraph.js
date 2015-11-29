@@ -6,7 +6,7 @@ var saveGraph = require('ngraph.tobinary');
 var fs = require('fs');
 var path = require('path');
 var outDir = path.join(__dirname, '..', 'data');
-var buf = fs.readFileSync(path.join(__dirname, '..', 'out.count'));
+var buf = fs.readFileSync(path.join(__dirname, 'out.count'));
 
 var i = 0;
 var graph = require('ngraph.graph')({uniqueLinkId: false});
@@ -15,19 +15,20 @@ var b = require('../src/lib/bijectiveEncode.js');
 var encode = b.encode;
 var decode = b.decode;
 var arr = []
+var idx = 0;
 
 while (i < buf.length) {
   var x = buf.readInt32LE(i);
   i += 4;
-  graph.addNode(i);
+  graph.addNode(idx);
   arr.push(x);
+  idx += 1
 }
 
 var count = buf.length/4;
 var model = createModel(arr);
 
-var i = 0;
-while (i < count) {
+for (var i = 0; i < count; ++i) {
   var sequence = encode(i);
   var childIndex = decode(sequence + 'A') - 1;
   if (childIndex >= count) continue;
@@ -36,8 +37,6 @@ while (i < count) {
   graph.addLink(i, childIndex + 1);
   graph.addLink(i, childIndex + 2);
   graph.addLink(i, childIndex + 3);
-
-  ++i;
 }
 
 saveInitialPositions();
