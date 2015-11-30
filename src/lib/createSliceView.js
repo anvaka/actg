@@ -6,10 +6,11 @@ export default createSliceView;
 import legend from './legend.js';
 import THREE from 'three';
 import {VertexShader, FragmentShader} from './shaders/particle.js';
-import createHitTest from './hit-test.js';
+import createHitTest from './createHitTest.js';
+import getNearestIndex from './getNearestIndex.js';
 import makeTextSprite from './makeTextSprite.js';
 
-function createSliceView(nodes, scene, name) {
+function createSliceView(nodes, scene, controls, name) {
   var uniforms = {
     size: {
       type: 'f',
@@ -17,6 +18,7 @@ function createSliceView(nodes, scene, name) {
     }
   };
 
+  var lastHovered;
   var edgeMesh;
   var shaderMaterial = new THREE.ShaderMaterial({
     uniforms: uniforms,
@@ -42,8 +44,8 @@ function createSliceView(nodes, scene, name) {
 
   setNodes();
 
-    // hitTest = createHitTest(particleSystem, container, controls);
-    // hitTest.on('over', reportMouseOver);
+  var hitTest = createHitTest(particleSystem, controls);
+  hitTest.on('over', reportMouseOver);
 
   var slice = new THREE.Group();
   slice.add(makeTextSprite(name, legend[name]));
@@ -53,7 +55,8 @@ function createSliceView(nodes, scene, name) {
   return {
     getSlice,
     clearHighlight,
-    highlight
+    highlight,
+    hit
   };
 
   function getSlice() {
@@ -158,5 +161,27 @@ function createSliceView(nodes, scene, name) {
       childIndex += 1;
     }
     lastLineIndex = idx;
+  }
+
+  function hit(scene, camera) {
+    hitTest.update(scene, camera);
+  }
+
+  function reportMouseOver(e) {
+    var nearestIndex = getNearestIndex(positions, e.indexes, e.ray, 30);
+    if (lastHovered === nearestIndex) return;
+    lastHovered = nearestIndex;
+    debugger;
+    // each node has three coordinages.
+    var modelIndex = lastHovered === undefined ? undefined : lastHovered / 3;
+
+    dispatch({
+      type: 'hover',
+      data: {
+        index: modelIndex,
+        x: e.x,
+        y: e.y
+      }
+    });
   }
 }

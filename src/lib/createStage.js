@@ -1,6 +1,5 @@
 import THREE from 'three';
 import fly from 'three.fly';
-import getNearestIndex from './getNearestIndex.js';
 import { encode, decode } from './bijectiveEncode.js';
 import createSliceView from './createSliceView.js';
 import config from '../../config.js';
@@ -11,10 +10,9 @@ export default createStage;
 var WIDTH = config.boxSize;
 
 function createStage(model) {
-  var camera, renderer, scene, controls, geometry, uniforms;
-  var positions, hitTest, sizes, lines;
+  var camera, renderer, scene, controls;
+  var subtrees;
 
-  var lastHovered;
   init();
   requestAnimationFrame(render);
 
@@ -25,9 +23,16 @@ function createStage(model) {
   function render() {
     requestAnimationFrame(render);
     renderer.render(scene, camera);
-    //hitTest.update(scene, camera);
+    updateHitTest(scene, camera);
     controls.update(1);
     adjustMovementSpeed(controls, camera);
+  }
+
+  function updateHitTest(scene, camera) {
+    subtrees.aView.hit(scene, camera);
+    subtrees.cView.hit(scene, camera);
+    subtrees.tView.hit(scene, camera);
+    subtrees.gView.hit(scene, camera);
   }
 
   function init() {
@@ -49,8 +54,7 @@ function createStage(model) {
 
     adjustMovementSpeed(controls, camera);
 
-
-    var subtrees = getSubtrees();
+    subtrees = getSubtrees();
     buildCubeFromSubtrees(subtrees);
     listenToHighlightEvents(subtrees);
 
@@ -76,23 +80,23 @@ function createStage(model) {
 
   function buildCubeFromSubtrees(subtrees) {
     // We create a box of A, C, T and G slices
-    subtrees.aView = createSliceView(subtrees.A, scene, 'A');
+    subtrees.aView = createSliceView(subtrees.A, scene, controls, 'A');
     var aView = subtrees.aView.getSlice();
     aView.position.z = WIDTH;
     aView.position.x = -WIDTH / 2;
 
-    subtrees.cView = createSliceView(subtrees.C, scene, 'C');
+    subtrees.cView = createSliceView(subtrees.C, scene, controls, 'C');
     var cView = subtrees.cView.getSlice();
     cView.rotation.y = Math.PI / 2;
     cView.position.y = -WIDTH / 2;
     cView.position.x = WIDTH;
 
-    subtrees.gView = createSliceView(subtrees.G, scene, 'G');
+    subtrees.gView = createSliceView(subtrees.G, scene, controls, 'G');
     var gView = subtrees.gView.getSlice();
     gView.position.x = WIDTH / 2;
     gView.position.z = -WIDTH;
 
-    subtrees.tView = createSliceView(subtrees.T, scene, 'T');
+    subtrees.tView = createSliceView(subtrees.T, scene, controls, 'T');
     var tView = subtrees.tView.getSlice();
     tView.rotation.y = Math.PI / 2;
     tView.position.x = -WIDTH;
@@ -115,23 +119,6 @@ function createStage(model) {
     }, subtrees);
 
     return subtrees;
-  }
-
-  function reportMouseOver(e) {
-    var nearestIndex = getNearestIndex(positions, e.indexes, e.ray, 30);
-    if (lastHovered === nearestIndex) return;
-    lastHovered = nearestIndex;
-    // each node has three coordinages.
-    var modelIndex = lastHovered === undefined ? undefined : lastHovered / 3;
-
-    dispatch({
-      type: 'hover',
-      data: {
-        index: modelIndex,
-        x: e.x,
-        y: e.y
-      }
-    });
   }
 
   function onWindowResize() {

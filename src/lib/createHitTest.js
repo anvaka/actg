@@ -7,7 +7,7 @@ var createOctree = require('yaot');
 
 export default createHitTest;
 
-function createHitTest(pointCloud, domElement, inputController) {
+function createHitTest(pointCloud, inputController) {
   if (!pointCloud) {
     throw new Error('hit-test cannot work without particle view');
   }
@@ -17,7 +17,7 @@ function createHitTest(pointCloud, domElement, inputController) {
 
   var raycaster = new THREE.Raycaster();
 
-  domElement = domElement || document.body;
+  var domElement = document.getElementById('three-root');
 
   // we will store mouse coordinates here to process on next RAF event (`update()` method)
   var mouse = {
