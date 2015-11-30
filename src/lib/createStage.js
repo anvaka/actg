@@ -3,11 +3,12 @@ import fly from 'three.fly';
 import getNearestIndex from './getNearestIndex.js';
 import legend from './legend.js';
 import { encode, decode } from './bijectiveEncode.js';
-import { WIDTH } from './model.js';
 import createSliceView from './createSliceView.js';
+import config from '../../config.js';
 
 export default createStage;
 
+var WIDTH = config.boxSize;
 var fontUtils = require('./fontUtils.js');
 var typeface = require('three.regular.helvetiker');
 fontUtils.loadFace(typeface);

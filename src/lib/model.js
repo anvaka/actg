@@ -1,11 +1,9 @@
+var config = require('../../config.js');
 module.exports = createModel;
-module.exports.WIDTH = 1024;
 
-var boxWidth = module.exports.WIDTH;
 var b = require('./bijectiveEncode.js');
 var encode = b.encode;
 var decode = b.decode;
-
 
 function createModel(array) {
   var api = {
@@ -38,7 +36,7 @@ function createModel(array) {
   }
 
   function addNodeModel(frequency, index) {
-    var model = getNodeModel(frequency, index, boxWidth);
+    var model = getNodeModel(frequency, index);
     if (model) {
       tree.set(model.sequence, model);
     }
@@ -50,14 +48,14 @@ function createModel(array) {
   * @param {Number} frequency of the chain occurrence
   * @param {Number} index of the frequency in the encoded file
   */
-  function getNodeModel(frequency, index, boxWidth) {
+  function getNodeModel(frequency, index) {
     if (frequency === 0) return;
 
     var sequence = encode(index + 1); // it's 1 based, not 0
 
     var level = sequence.length;
     var dx = 0, dy = 0, dz = 0;
-    var r = boxWidth / Math.pow(2, level);
+    var r = config.boxSize / Math.pow(2, level);
     var parent;
     if (level === 1) { // we are at the root
       parent = { x: 0, y: 0 };
