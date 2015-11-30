@@ -1,10 +1,16 @@
 import THREE from 'three';
 import fly from 'three.fly';
 import getNearestIndex from './getNearestIndex.js';
-import {encode, decode} from './bijectiveEncode.js';
+import legend from './legend.js';
+import { encode, decode } from './bijectiveEncode.js';
+import { WIDTH } from './model.js';
 import createSliceView from './createSliceView.js';
 
 export default createStage;
+
+var fontUtils = require('./fontUtils.js');
+var typeface = require('three.regular.helvetiker');
+fontUtils.loadFace(typeface);
 
 function createStage(model) {
   var camera, renderer, scene, controls, geometry, uniforms;
@@ -34,33 +40,55 @@ function createStage(model) {
     renderer = new THREE.WebGLRenderer();
     renderer.setPixelRatio(window.devicePixelRatio);
 
-    var WIDTH = window.innerWidth;
-    var HEIGHT = window.innerHeight;
-    renderer.setSize(WIDTH, HEIGHT);
+    renderer.setSize(window.innerWidth, window.innerHeight);
 
     var container = document.getElementById('three-root');
     container.appendChild(renderer.domElement);
 
     controls = fly(camera, container, THREE);
-    camera.position.z = 1500;
-    camera.position.x = 200;
-    camera.position.y = 200;
+    camera.position.z = 0;
+    camera.position.x = 0;
+    camera.position.y = 0;
 
     adjustMovementSpeed(controls, camera);
 
 
     var subtrees = getSubtrees();
-    var ASlice = createSliceView(subtrees.A);
+
+    // We create a box of A, C, T and G slices
+    var ASlice = new THREE.Group();
+    ASlice.add(makeTextSprite('A', legend.A));
+    ASlice.add(createSliceView(subtrees.A));
+
+    ASlice.position.z = WIDTH;
+    ASlice.position.x = -WIDTH / 2;
+
     scene.add(ASlice);
 
-    var CSlice = createSliceView(subtrees.C);
+    var CSlice = new THREE.Group();
+    CSlice.add(makeTextSprite('C', legend.C));
+    CSlice.add(createSliceView(subtrees.C));
+    CSlice.rotation.y = Math.PI / 2;
+    CSlice.position.y = -WIDTH / 2;
+    CSlice.position.x = WIDTH;
     scene.add(CSlice);
 
-    var GSlice = createSliceView(subtrees.G);
+    var GSlice = new THREE.Group();
+    GSlice.add(makeTextSprite('G', legend.G));
+    GSlice.add(createSliceView(subtrees.G));
+
+    GSlice.position.x = WIDTH / 2;
+    GSlice.position.z = -WIDTH;
     scene.add(GSlice);
 
-    var TSlice = createSliceView(subtrees.T);
+    var TSlice = new THREE.Group();
+    TSlice.add(makeTextSprite('T', legend.T));
+    TSlice.add(createSliceView(subtrees.T))
+    TSlice.rotation.y = Math.PI / 2;
+    TSlice.position.x = -WIDTH;
+    TSlice.position.y = WIDTH / 2;
     scene.add(TSlice);
+
     window.A = ASlice;
     window.C = CSlice;
     window.G = GSlice;
@@ -113,7 +141,7 @@ function createStage(model) {
     if (lastHovered === nearestIndex) return;
     lastHovered = nearestIndex;
     // each node has three coordinages.
-    var modelIndex = lastHovered === undefined ? undefined: lastHovered/3;
+    var modelIndex = lastHovered === undefined ? undefined : lastHovered / 3;
 
     dispatch({
       type: 'hover',
@@ -129,7 +157,7 @@ function createStage(model) {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
 
-    renderer.setSize( window.innerWidth, window.innerHeight );
+    renderer.setSize(window.innerWidth, window.innerHeight);
   }
 
   function adjustMovementSpeed(controls, camera) {
@@ -137,9 +165,33 @@ function createStage(model) {
     var z = Math.min(absZ, 5700);
     var speed = Math.max(0.1, z / 57);
     controls.movementSpeed = speed;
+    controls.movementSpeed = 10;
   }
 
   function getCameraUniform() {
     return new THREE.Vector3(camera.aspect, window.innerWidth, window.innerHeight);
   }
+}
+
+function makeTextSprite(message, color) {
+  var textMaterial = new THREE.MeshBasicMaterial({
+    color: color,
+    side: THREE.DoubleSide,
+    wireframe: false
+  });
+
+  var options = {
+    size: 180,
+    height: 20,
+    curveSegments: 2,
+    font: 'helvetiker',
+    bevelEnabled: false
+  }
+
+  var textShapes = THREE.FontUtils.generateShapes(message, options);
+
+  var text3d = new THREE.ShapeGeometry(textShapes);
+  text3d.computeBoundingBox();
+
+  return new THREE.Mesh(text3d, textMaterial);
 }

@@ -3,7 +3,8 @@
  */
 export default createSliceView;
 
-import THREE from 'three'
+import legend from './legend.js';
+import THREE from 'three';
 import {VertexShader, FragmentShader} from './shaders/particle.js';
 import createHitTest from './hit-test.js';
 
@@ -55,17 +56,8 @@ function createSliceView(nodes) {
       positions[idx + 2] = node.z;
       sizes[i] = node.size;
       var c = node.sequence[node.sequence.length - 1];
-      switch (c) {
-        case 'A': setColor(idx, 0xFF, 0x6B, 0x6B);
-          break;
-        case 'C': setColor(idx, 0xFF, 0xAE, 0x6B);
-          break;
-        case 'G': setColor(idx, 0x4E, 0xBA, 0xBA);
-          break;
-        case 'T': setColor(idx, 0x5C, 0xDD, 0x5C);
-          break;
-      }
-
+      var color = legend[c];
+      setColor(idx, color.r, color.g, color.b);
       i += 1;
     }
   }

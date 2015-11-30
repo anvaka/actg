@@ -30,6 +30,7 @@
     "redux": "^3.0.4",
     "three": "^0.73.0",
     "three.fly": "^0.1.6",
+    "three.regular.helvetiker": "^1.0.0",
     "yaot": "^1.1.3"
   },
   "devDependencies": {

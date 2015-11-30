@@ -1,9 +1,11 @@
 module.exports = createModel;
+module.exports.WIDTH = 1024;
 
-var boxWidth = 1024;
+var boxWidth = module.exports.WIDTH;
 var b = require('./bijectiveEncode.js');
 var encode = b.encode;
 var decode = b.decode;
+
 
 function createModel(array) {
   var api = {
