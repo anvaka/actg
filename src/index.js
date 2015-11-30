@@ -19,6 +19,6 @@ fetch(endpoint, {
 }).then(function (buffer) {
   var model = createModel(new Uint32Array(buffer));
   createStage(model);
+  render(<App model={model} />, document.getElementById('react-root'));
 });
 
-render(<App />, document.getElementById('react-root'));

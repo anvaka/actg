@@ -5,7 +5,7 @@ export class App extends Component {
   render() {
     return (
     <div>
-      <SearchBar />
+      <SearchBar model={this.props.model} />
     </div>);
   }
 }
