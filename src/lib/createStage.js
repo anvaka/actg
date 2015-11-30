@@ -1,11 +1,10 @@
 import THREE from 'three';
 import fly from 'three.fly';
 import getNearestIndex from './getNearestIndex.js';
-import legend from './legend.js';
 import { encode, decode } from './bijectiveEncode.js';
 import createSliceView from './createSliceView.js';
 import config from '../../config.js';
-import makeTextSprite from './makeTextSprite.js';
+import bus from '../bus.js';
 
 export default createStage;
 
@@ -15,7 +14,6 @@ function createStage(model) {
   var camera, renderer, scene, controls, geometry, uniforms;
   var positions, hitTest, sizes, lines;
 
-  var lastLineIndex = 0;
   var lastHovered;
   init();
   requestAnimationFrame(render);
@@ -54,45 +52,51 @@ function createStage(model) {
 
     var subtrees = getSubtrees();
     buildCubeFromSubtrees(subtrees);
+    listenToHighlightEvents(subtrees);
 
     window.addEventListener('resize', onWindowResize, false);
   }
 
+  function listenToHighlightEvents(subtrees) {
+    bus.on('highlight', updateHighlight);
+
+    function updateHighlight(sequence) {
+      subtrees.aView.clearHighlight();
+      subtrees.cView.clearHighlight();
+      subtrees.tView.clearHighlight();
+      subtrees.gView.clearHighlight();
+
+      if (sequence) {
+        // route highlight request to proper subtrek
+        var treeName = sequence[0].toLowerCase() + 'View';
+        subtrees[treeName].highlight(sequence);
+      }
+    }
+  }
 
   function buildCubeFromSubtrees(subtrees) {
     // We create a box of A, C, T and G slices
-    var ASlice = new THREE.Group();
-    ASlice.add(makeTextSprite('A', legend.A));
-    ASlice.add(createSliceView(subtrees.A));
+    subtrees.aView = createSliceView(subtrees.A, scene, 'A');
+    var aView = subtrees.aView.getSlice();
+    aView.position.z = WIDTH;
+    aView.position.x = -WIDTH / 2;
 
-    ASlice.position.z = WIDTH;
-    ASlice.position.x = -WIDTH / 2;
+    subtrees.cView = createSliceView(subtrees.C, scene, 'C');
+    var cView = subtrees.cView.getSlice();
+    cView.rotation.y = Math.PI / 2;
+    cView.position.y = -WIDTH / 2;
+    cView.position.x = WIDTH;
 
-    scene.add(ASlice);
+    subtrees.gView = createSliceView(subtrees.G, scene, 'G');
+    var gView = subtrees.gView.getSlice();
+    gView.position.x = WIDTH / 2;
+    gView.position.z = -WIDTH;
 
-    var CSlice = new THREE.Group();
-    CSlice.add(makeTextSprite('C', legend.C));
-    CSlice.add(createSliceView(subtrees.C));
-    CSlice.rotation.y = Math.PI / 2;
-    CSlice.position.y = -WIDTH / 2;
-    CSlice.position.x = WIDTH;
-    scene.add(CSlice);
-
-    var GSlice = new THREE.Group();
-    GSlice.add(makeTextSprite('G', legend.G));
-    GSlice.add(createSliceView(subtrees.G));
-
-    GSlice.position.x = WIDTH / 2;
-    GSlice.position.z = -WIDTH;
-    scene.add(GSlice);
-
-    var TSlice = new THREE.Group();
-    TSlice.add(makeTextSprite('T', legend.T));
-    TSlice.add(createSliceView(subtrees.T))
-    TSlice.rotation.y = Math.PI / 2;
-    TSlice.position.x = -WIDTH;
-    TSlice.position.y = WIDTH / 2;
-    scene.add(TSlice);
+    subtrees.tView = createSliceView(subtrees.T, scene, 'T');
+    var tView = subtrees.tView.getSlice();
+    tView.rotation.y = Math.PI / 2;
+    tView.position.x = -WIDTH;
+    tView.position.y = WIDTH / 2;
   }
 
   function getSubtrees() {
@@ -111,28 +115,6 @@ function createStage(model) {
     }, subtrees);
 
     return subtrees;
-  }
-
-  function setConnection(node, i) {
-    var sequence = node.sequence;
-    var childIndex = decode(sequence + 'A') - 1;
-    if (childIndex >= model.getCount()) {
-      return;
-    }
-    var idx = lastLineIndex;
-    for (var i = 0; i < 4; ++i) {
-      lines[idx] = node.x;
-      lines[idx + 1] = node.y;
-      lines[idx + 2] = node.z;
-
-      var childNode = model.nodeAt(childIndex);
-      lines[idx + 3] = childNode.x;
-      lines[idx + 4] = childNode.y;
-      lines[idx + 5] = childNode.z;
-      idx += 6;
-      childIndex += 1;
-    }
-    lastLineIndex = idx;
   }
 
   function reportMouseOver(e) {
