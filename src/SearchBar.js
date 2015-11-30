@@ -9,12 +9,12 @@ class SearchBar extends React.Component {
 
     return (
    <div className='container row'>
-      <div className='search col-xs-12 col-sm-6 col-md-4'>
+      <div className='search col-xs-12 col-sm-6 col-md-5'>
         <form className='search-form' role='search' onSubmit={this.runSubmit.bind(this)}>
           <div className='input-group'>
             <input type='text'
               id='searchValue'
-              className='form-control no-shadow' placeholder='Enter A, T, C, G sequence here'
+              className='form-control no-shadow' placeholder='Enter A, T, C, G sequence. E.g. ACTG'
               onChange={this.runSearch.bind(this)}/>
               <span className='input-group-btn'>
                 <button className='btn' tabIndex='-1' type='submit'>
@@ -69,7 +69,7 @@ SearchBar.prototype.state = {
 function formatUsed(node) {
   if (!node) return null;
   var number = formatNumber(node.frequency);
-  return <div className='results'><b>{node.sequence}</b> occurs <b>{number}</b> times</div>;
+  return <div className='results'>Chain <b>{node.sequence}</b> occurs <b>{number}</b> times</div>;
 }
 
 function formatNumber(n) {

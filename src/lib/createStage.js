@@ -5,13 +5,11 @@ import legend from './legend.js';
 import { encode, decode } from './bijectiveEncode.js';
 import createSliceView from './createSliceView.js';
 import config from '../../config.js';
+import makeTextSprite from './makeTextSprite.js';
 
 export default createStage;
 
 var WIDTH = config.boxSize;
-var fontUtils = require('./fontUtils.js');
-var typeface = require('three.regular.helvetiker');
-fontUtils.loadFace(typeface);
 
 function createStage(model) {
   var camera, renderer, scene, controls, geometry, uniforms;
@@ -55,7 +53,13 @@ function createStage(model) {
 
 
     var subtrees = getSubtrees();
+    buildCubeFromSubtrees(subtrees);
 
+    window.addEventListener('resize', onWindowResize, false);
+  }
+
+
+  function buildCubeFromSubtrees(subtrees) {
     // We create a box of A, C, T and G slices
     var ASlice = new THREE.Group();
     ASlice.add(makeTextSprite('A', legend.A));
@@ -89,12 +93,6 @@ function createStage(model) {
     TSlice.position.x = -WIDTH;
     TSlice.position.y = WIDTH / 2;
     scene.add(TSlice);
-
-    window.A = ASlice;
-    window.C = CSlice;
-    window.G = GSlice;
-    window.T = TSlice;
-    window.addEventListener('resize', onWindowResize, false);
   }
 
   function getSubtrees() {
@@ -162,10 +160,10 @@ function createStage(model) {
   }
 
   function adjustMovementSpeed(controls, camera) {
-    var absZ = Math.abs(camera.position.z);
-    var z = Math.min(absZ, 5700);
-    var speed = Math.max(0.1, z / 57);
-    controls.movementSpeed = speed;
+    // var absZ = Math.abs(camera.position.z);
+    // var z = Math.min(absZ, 5700);
+    // var speed = Math.max(0.1, z / 57);
+    // controls.movementSpeed = speed;
     controls.movementSpeed = 10;
   }
 
@@ -174,25 +172,3 @@ function createStage(model) {
   }
 }
 
-function makeTextSprite(message, color) {
-  var textMaterial = new THREE.MeshBasicMaterial({
-    color: color,
-    side: THREE.DoubleSide,
-    wireframe: false
-  });
-
-  var options = {
-    size: 180,
-    height: 20,
-    curveSegments: 2,
-    font: 'helvetiker',
-    bevelEnabled: false
-  }
-
-  var textShapes = THREE.FontUtils.generateShapes(message, options);
-
-  var text3d = new THREE.ShapeGeometry(textShapes);
-  text3d.computeBoundingBox();
-
-  return new THREE.Mesh(text3d, textMaterial);
-}
